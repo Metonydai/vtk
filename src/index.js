@@ -21,6 +21,7 @@ import '@kitware/vtk.js/IO/Core/DataAccessHelper/JSZipDataAccessHelper';
 import vtkInteractorStyleTrackballCamera from '@kitware/vtk.js/Interaction/Style/InteractorStyleTrackballCamera';
 
 import styles from './viewer.module.css';
+import { w } from '@kitware/vtk.js/macros2';
 
 let autoInit = true;
 
@@ -87,9 +88,12 @@ export function load(container, options) {
     desiredCamera.setViewUp(0, 0, -1);
 
     // Set default camera properties
-    let desiredCameraPosition =  [0.010071849127698103, 0.15472999903174284, -0.009726987415391661];
-    let desiredFocalPoint = [0.014564056216963259, 0.07709279066810601, -0.011402344554135007];
-    let desiredViewUp = [-0.112091956508334, 0.014955070646163644, -0.9935852953562176];
+    //let desiredCameraPosition = [0.11267948247883869, 0.4069797732752285, -0.3530998305333525];
+    //let desiredFocalPoint = [-0.02696058176651228, 0.006487687564310618, -0.0033351274026653943];
+    //let desiredViewUp = [-0.9652903846706784, 0.23228365317973815, -0.1194101240590961];
+    let desiredCameraPosition = [0.13716509309763456, 0.5111986199795905, 0.14573379338372205];
+    let desiredFocalPoint = [-0.01549185173439814, 0.05924350092025432, -0.12750791896312408];
+    let desiredViewUp = [-0.9329688339918345, 0.35412958598130867, -0.06450884538281568];
 
     // Function to log camera properties
     function logCameraProperties(cam) {
@@ -115,7 +119,51 @@ export function load(container, options) {
             logCameraProperties(hui_camera);
         }
     });
+    // Assuming you have access to the renderer and camera
+    function setTopView(camera, renderWindow) {
+        // Set camera to top view (adjust the position to suit your scene)
+        camera.setPosition(0, 3, 0); // Example top-down position
+        camera.setFocalPoint(0, 0, 0); // Looking at the origin
+        camera.setViewUp([0, 0, -1]); // Adjust the up vector
 
+        window.renderWindow.render(); // Re-render the scene to apply changes
+        syncRW.render();
+    }
+
+    // Add event listener for keypress
+    window.addEventListener('keydown', (event) => {
+        const huiRenderer = syncRW.getRenderers()[1];
+        const huiCamera = huiRenderer.getActiveCamera();
+        if (event.key === 't') {
+            // Call your function to set the camera to top view
+            setTopView(huiCamera, syncRW);
+            huiRenderer.getRenderWindow().render();;
+        }
+    });
+
+    // Add event listener for keypress
+    window.addEventListener('keydown', (event) => {
+        const huiRenderer = syncRW.getRenderers()[1];
+        const huiCamera = huiRenderer.getActiveCamera();
+        if (event.key === 'z') {
+            // Call your function to set the camera to top view
+            huiCamera.zoom(1.1);
+            syncRW.render();
+            window.renderWindow.render(); // Re-render the scene to apply changes
+        }
+    });
+
+    // Add event listener for keypress
+    window.addEventListener('keydown', (event) => {
+        const huiRenderer = syncRW.getRenderers()[1];
+        const huiCamera = huiRenderer.getActiveCamera();
+        if (event.key === 'x') {
+            // Call your function to set the camera to top view
+            huiCamera.zoom(0.9);
+            syncRW.render();
+            window.renderWindow.render(); // Re-render the scene to apply changes
+        }
+    });
     // Function to set camera properties
     function setCameraProperties() {
         camera.setPosition(...desiredCameraPosition);
@@ -141,6 +189,8 @@ export function load(container, options) {
         huiCamera.setPosition(...desiredCameraPosition);
         huiCamera.setFocalPoint(...desiredFocalPoint);
         huiCamera.setViewUp(...desiredViewUp);
+        huiCamera.orthogonalizeViewUp();
+        huiRenderer.resetCameraClippingRange();
         //for (let i = 0; i < huiRenderer.getActors().length; i++)
         //{
         //    let actor = huiRenderer.getActors()[i];
@@ -156,6 +206,7 @@ export function load(container, options) {
 
         syncRW.render();
         huiRenderer.getRenderWindow().render();
+        window.renderWindow.render()
     }
 
 
